@@ -10,14 +10,15 @@ Originally, PICOSS was designed for the purposes of seismicity research as a col
 (UGR) and University of Liverpool (UoL). However, the system can be used within a wide range of geophysical applications.
 
 
-![PICOSS logo](https://github.com/srsudo/picos_development/blob/master/info/img/picos_header.png)
+![PICOSS logo](https://github.com/srsudo/PICOSS/tree/master/info/img/picos_header.png)
+
 
 ## Installation
 
 PICOSS works in OS X & Linux and Windows. We strongly recommend to install [Docker containers](https://docs.docker.com/engine/installation/) 
 or [Anaconda environment](https://conda.io/docs/user-guide/install/index.html) first. 
 
-Requisites can be found in [requirements] (requirements.md) file. See [Installing PICOSS](https://github.com/srsudo/picos_development/blob/master/info/installation.md) 
+Requisites can be found in [requirements] (requirements.md) file. See [Installing PICOSS](https://github.com/srsudo/PICOSS/tree/master/info/installation.md) 
 for detailed instructions about the installation of PICOSS. 
 
 ## Usage example
@@ -29,7 +30,7 @@ $ python run_picos.py
 ```
 
 The main GUI window should appear, and data can be accessed for posterior analysis. For detailed explanations and more 
-examples about how to use PICOSS, please refer to the [tutorial](https://github.com/srsudo/picos_development/blob/master/info/tutorials/howto.md)_
+examples about how to use PICOSS, please refer to the [tutorial](https://github.com/srsudo/PICOSS/tree/master/info/tutorials/howto.md)_
 
 
 ## Release History
