@@ -14,10 +14,11 @@ Originally, PICOSS was designed for the purposes of seismicity research as a col
 
 ## Installation
 
-* PICOSS works in OS X & Linux and Windows. We strongly recommend to install [Docker containers](https://docs.docker.com/engine/installation/) 
-or [Anaconda environment](https://conda.io/docs/user-guide/install/index.html) first. Requisites can be found in [requirements] (requirements.md) file.
+PICOSS works in OS X & Linux and Windows. We strongly recommend to install [Docker containers](https://docs.docker.com/engine/installation/) 
+or [Anaconda environment](https://conda.io/docs/user-guide/install/index.html) first. 
 
-See [Installing PICOSS](https://github.com/srsudo/picos_development/blob/master/info/installation.md) for detailed instructions about the installation of PICOSS. 
+Requisites can be found in [requirements] (requirements.md) file. See [Installing PICOSS](https://github.com/srsudo/picos_development/blob/master/info/installation.md) 
+for detailed instructions about the installation of PICOSS. 
 
 ## Usage example
 
@@ -27,15 +28,27 @@ Once all dependencies are installed, we can run PICOSS from the terminal:
 $ python run_picos.py
 ```
 
-The main interface should appear, and data can be accessed for posterior analysis. For detailed explanations and more 
+The main GUI window should appear, and data can be accessed for posterior analysis. For detailed explanations and more 
 examples about how to use PICOSS, please refer to the [tutorial](https://github.com/srsudo/picos_development/blob/master/info/tutorials/howto.md)_
 
-## Contact: 
+
+## Release History
+
+* 0.1.0
+    * First relase with expanded functionalities
+    * CHANGE: Rename `foo()` to `bar()`
+* 0.0.1
+    * Work in progress
+
+## Meta: 
 
 Angel Bueno - angelbueno@ugr.es
 Alejandro Diaz - aledm@liverpool.ac.uk
 Jack Woolam - jack.woollam@liverpool.ac.uk
 Luciano Zuccarello - lzuk@ugr.es
+
+Distributed under the MIT license. See ``LICENSE`` for more information.
+
 
 ## Contributing
 
