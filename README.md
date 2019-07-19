@@ -29,7 +29,7 @@ Once all dependencies are installed, we can run PICOSS from the Python CLI (or t
 $ python run_picos.py
 ```
 
-The main GUI window should appear, and data can be accessed. For detailed explanations and more 
+The main GUI window should appear, and data can be accessed normally. For detailed explanations and more 
 examples about how to use PICOSS, please refer to the [tutorial](https://github.com/srsudo/PICOSS/tree/master/info/tutorials/howto.md)_
 
 
