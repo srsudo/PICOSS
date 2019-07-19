@@ -15,7 +15,7 @@ Originally, PICOSS was designed for the purposes of seismicity research as a col
 
 ## Installation
 
-PICOSS works in OS X & Linux and Windows. We strongly recommend to install [Docker containers](https://docs.docker.com/engine/installation/) 
+PICOSS works in OS X & Linux and Windows systems. We strongly recommend to install [Docker containers](https://docs.docker.com/engine/installation/) 
 or [Anaconda environment](https://conda.io/docs/user-guide/install/index.html) first. 
 
 Requisites can be found in [requirements] (requirements.md) file. See [Installing PICOSS](https://github.com/srsudo/PICOSS/tree/master/info/installation.md) 
