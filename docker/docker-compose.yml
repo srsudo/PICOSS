@@ -3,8 +3,8 @@ services:
   interface_picos:
     build: .
     volumes:
-      - ./data:/home/picos/data
-      - ./segmented_data:/home/picos/segmented_data
-      - /tmp/.X11-unix:/tmp/.X11-unix
+    - ./data:/home/picos/data
+    - ./segmented_data:/home/picos/segmented_data
+    - /tmp/.X11-unix:/tmp/.X11-unix
     environment:
-      - DISPLAY=unix$DISPLAY
+    - DISPLAY=unix$DISPLAY

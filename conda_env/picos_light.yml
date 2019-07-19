@@ -1,6 +1,6 @@
 name: picos_light
 channels:
-- conda-forge 
+- conda-forge
 dependencies:
 - python=2.7
 - pip

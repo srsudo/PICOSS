@@ -29,15 +29,15 @@ Once all dependencies are installed, we can run PICOSS from the terminal:
 $ python run_picos.py
 ```
 
-The main GUI window should appear, and data can be accessed for posterior analysis. For detailed explanations and more 
+The main GUI window should appear, and data can be accessed. For detailed explanations and more 
 examples about how to use PICOSS, please refer to the [tutorial](https://github.com/srsudo/PICOSS/tree/master/info/tutorials/howto.md)_
 
 
 ## Release History
 
 * 0.1.0
-    * First relase with expanded functionalities
-    * CHANGE: Rename `foo()` to `bar()`
+    * First release with expanded functionalities
+    * code-ready for submission
 * 0.0.1
     * Work in progress
 
