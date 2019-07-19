@@ -1,0 +1,19 @@
+name: picos_light
+channels:
+- conda-forge
+dependencies:
+- python=2.7
+- pip
+- conda-forge::obspy=1.1.0=py27_1
+- conda-forge::pyqt=4.11.4=py27_2
+- conda-forge::lxml
+- scikit-learn=0.19.1
+- numpy=1.10.4
+- scipy=0.19.1
+- libxml2=2.9.0=0
+- libxslt=1.1.28=0
+- llvm=3.3=0
+- llvmlite=0.20.0=py27_0
+- llvmpy=0.12.4=py27_0
+- lxml=3.3.5=py27_0
+- matplotlib=2.0.2=np110py27_0
