@@ -41,6 +41,19 @@ def load_pickle(folder, filename):
         pass
 
 
+def load_picking_file(filename):
+    """Function to load the picking file previously processed by our interface"""
+    try:
+        f = open(filename, 'rb')
+        loaded_object = cPickle.load(f)
+        f.close()
+        return loaded_object
+    except (IOError, OSError) as e:
+        pass
+
+def get_params_picking():
+    pass
+
 def plot_signal():
     raise NotImplementedError
 
@@ -55,8 +68,6 @@ def merge_numpy(stream):
     array
         The array as a single numpy array
     """
-
-
     data = []
     for k in xrange(len(stream)):
         data.append(stream[k].data)

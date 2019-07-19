@@ -22,7 +22,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigatio
 # Own packages
 from picos_gui import picoss_main
 from picos_gui import picoss_func
-
+from utils import knowaves_utils
 import picoss_config
 
 # Numerical Computation packages
@@ -105,7 +105,9 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         # ExtraMenus
         self.isolated_menu = None
         self.connection_menu = None
-
+        self.component_menu = None
+        self.stations_window = None
+        self.stalta = None
         self.show()  # Show the interface
 
     def create_menus(self):
@@ -173,6 +175,10 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         if self.ax is None:
             pass
 
+    """
+    Functions to connect with Other Menus
+    """
+
     def show_isolated(self):
         """
         Function to load the data from folder whilst updating the parent.
@@ -180,15 +186,23 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         self.isolated_menu = picoss_func.WindowLoadFolder(self)
         self.isolated_menu.show()
 
+    def show_connection(self):
+        self.connection_menu = picoss_func.WindowConnection(self)
+        self.connection_menu.show()
+
     def show_components_menu(self):
-        pass
-        #self.component_menu = ChildWindowComponents(self)
-        #self.component_menu.show()
+        self.component_menu = picoss_func.WindowComponents(self)
+        self.component_menu.show()
 
     def show_other_stations(self):
-        pass
-        #self.stations_window = ChildWindowStations(self)
-        #self.stations_window.show()
+        """Function to show other stations"""
+        self.stations_window = picoss_func.WindowStations(self)
+        self.stations_window.show()
+
+    def load_picking_results(self):
+        """Function to load picking results from a previously processed file"""
+        self.stalta = picoss_func.WindowPicklingFile(self)
+        self.stalta.show()
 
     def show_STALTA(self):
         pass
@@ -196,22 +210,35 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
     def show_AMPA(self):
         pass
 
+    def show_auxiliar_menu(self):
+        self.connection_menu = picoss_func.WindowFrequency(self)
+        self.connection_menu.show()
+
+    """
+    End of Functions to connect with Other Menus
+    """
+
     def plot_stalta(self):
 
-        dict_loaded = self.load_pickle(self.trace_loaded_filename)
-        datos = obspy.core.trace.Trace(data=dict_loaded['data'])
+        """
+        Function that load the previously pre-processed STA/LTA file as a dictionary file.
+        Notice that in order to make this function work, it must be pre-processed using the included CLI,
+        specifically, the make_stalta.sh script
 
+        A own dictionary from another picking file, BUT with the following fields is also possible:
+            'data' -> (the seismic data we want to process as a NUmpy Array)
+            'on of' -> an activation vector with triggers on and off times
+            'fm' -> the sampling frequency we are working with.
+
+        """
+
+        dict_loaded = knowaves_utils.load_picking_file(self.trace_loaded_filename)
+        datos = obspy.core.trace.Trace(data=dict_loaded['data'])
         self.active_trace = datos.copy()
         self.stream = obspy.core.stream.Stream(traces=[self.active_trace])
-
         self.on_of = dict_loaded['on_of']
-
-        # self.fm = 100.0 # we need to save the FM in the sta/lta dictionary. MODIFY THIS ON THE PIPELINE
-        if "fm" in dict_loaded.keys():
-            self.fm = float(dict_loaded['fm'])
-        else:
-            self.fm = 100.0
-
+        self.fm = 100.0
+        #self.fm = float(dict_loaded['fm']) # load the sampling_frequency.
         time_Vector = np.linspace(0, self.active_trace.data.shape[0] / self.fm, num=self.active_trace.data.shape[0])
 
         self.toSave = "%s_%s_%s_%s_%s_%s.save" % (
@@ -234,26 +261,25 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         self.ax.axvline(self.last_ticked, color='magenta', linestyle='dashed')
         self.canvas_traza.draw()
 
-    def load_picking_results(self):
-        self.stalta = ChildWindow(self)
-        self.stalta.sta_lta = True
-        self.stalta.show()
-
     def peak_to_peak(self):
+        """
+        Function to compute the peak_to_peak amplitude in a given trace.
+        Returns:
+        Numpy
+            The absolute value of the peak to peak amplitude
+        """
 
-        valor = np.asarray([self.x1, self.x2]) * self.fm
-        chunkPlot = self.active_trace.data[int(valor[0]):int(valor[1])]
-        """
-        print np.asarray(chunkPlot)
-        print np.amin(chunkPlot)
-        print np.amax(chunkPlot)
-        """
+        value = np.asarray([self.x1, self.x2]) * self.fm
+        chunkPlot = self.active_trace.data[int(value[0]):int(value[1])]
         return np.abs(np.amax(chunkPlot) - np.amin(chunkPlot))
 
-    def check_overlapping(self, v1, v2):
-        if (float(self.first_ticked) <= v1 <= float(self.last_ticked)):
+    def check_overlapping(self, v1,v2):
+        """Function to check if the current values are overlapped or not. This function avoid segmentation of overlapped
+          events.
+        """
+        if float(self.first_ticked) <= v1 <= float(self.last_ticked):
             return True
-        elif (float(self.first_ticked) <= round(self.x2, 2) <= float(self.last_ticked)):
+        elif float(self.first_ticked) <= round(self.v2, 2) <= float(self.last_ticked):  # change v2 to x2
             return True
         else:
             return False
@@ -299,17 +325,19 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         gc.collect()
 
     def handleButtonClicked(self, button):
-        # print('"%s" was clicked' % button.text())
         value = button.text().split(" ")[-1]
         self.current_label = value[1:-1]
 
     def submit_current_trace(self):
+        """Function to save the segmented events in a pickle file. Notice that if no segmented events are selected,
+           the data can not be saved.
+        """
         allRows = self.table_trace.rowCount()
         if self.ax is None or allRows == 0:
-            self.msg_box("No current trace is plotted", "Data can not be submitted")
+            self.msg_box("No current events are segmented", "Data can not be submitted")
         else:
-            data = []
-            data.append((self.start_data, self.end_data))
+            segmentation_table = []
+            segmentation_table.append((self.start_data, self.end_data))
             for row in xrange(0, allRows):
                 start_toSave = str(self.table_trace.item(row, 0).text())
                 end_toSave = str(self.table_trace.item(row, 1).text())
@@ -317,12 +345,15 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
                 peak_toSave = str(self.table_trace.item(row, 3).text())
                 duration_toSave = str(self.table_trace.item(row, 4).text())
                 slides_toSave = str(self.table_trace.item(row, 5).text())
-                alumni_toSave = str(self.table_trace.item(row, 6).text())  # qtsting
+                alumni_toSave = str(self.table_trace.item(row, 6).text())
+
+                # Created the segmentation table
                 new = [start_toSave, end_toSave, label_toSave, peak_toSave, duration_toSave, slides_toSave,
                        alumni_toSave]
-                data.append(new)
+                segmentation_table.append(new)
 
-            self.save_pickle(self.toSave, data)
+            knowaves_utils.save_pickle(self.destination_folder, self.toSave, segmentation_table)
+            # Clean the figures to free memory and allow further plotting.
             self.clean_table()
             self.clean_figures()
             self.clean_points()
@@ -331,31 +362,33 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
             gc.collect()
 
     def clean_table(self):
+        """function to clean the segmentation table"""
         self.table_trace.clearContents()
         self.table_trace.setRowCount(0)
 
     def clean_points(self):
+        """function to clean the selected ticked points"""
         self.x1 = 0
         self.x2 = 0
         self.first_ticked = 0
         self.last_ticked = 0
 
     def clean_figures(self):
+        """function to clean the figures and ticked points"""
         self.figura_spectrograma.clf()
         self.figura_fft.clf()
         self.canvas_specgram.draw()
         self.canvas_fft.draw()
 
     def redraw_trace(self):
-        # print self.ax.lines
+        """function to redraw the traces and ticked points"""
         [self.ax.lines[-1].remove() for x in range(2)]
-        # self.ax.lines[-1].remove()
-        # self.ax.lines[-1].remove()
         self.ax.axvline(self.first_ticked, color='green', linestyle='solid')
         self.ax.axvline(self.last_ticked, color='magenta', linestyle='dashed')
         self.canvas_traza.draw()
 
     def reset_interactive(self):
+        """function to reset the interactivity"""
         mode = self.ax.get_navigate_mode()
         if mode == "ZOOM":
             self.toggle_zoom()
@@ -367,9 +400,9 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
     def line_select_callback(self, eclick, erelease):
         'eclick and erelease are the press and release events'
         # put the previous one to zero, just in case
-        self.x1, self.y1, self.x2, self.y2 = 0, 0, 0, 0
-        self.x1, self.y1 = eclick.xdata, eclick.ydata
-        self.x2, self.y2 = erelease.xdata, erelease.ydata
+        self.x1, self.x2, self.y2 = 0, 0
+        self.x1 = eclick.xdata
+        self.x2 = erelease.xdata
 
     def toggle_zoom(self):
         if self.ax is not None:
@@ -383,22 +416,8 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         if self.ax is not None:
             self.ax.toolbar_trace.home()
 
-    def show_connection(self):
-        self.connection_menu = ChildWindowConnection(self)
-        self.connection_menu.show()
-
-    def show_auxiliar_menu(self):
-        self.connection_menu = ChildWindowAuxiliary(self)
-        self.connection_menu.show()
-
-    def merge_numpy(self, stream):
-        data = []
-        for k in xrange(len(stream)):
-            data.append(stream[k].data)
-
-        return np.asarray(np.hstack(data))
-
     def plot_from_file(self):
+        """function to plot from file the laoded traces"""
         self.stream = obspy.read(self.trace_loaded_filename)
         if self.ax is not None:
             self.clean_figures()
@@ -454,6 +473,7 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
             raise NotImplementedError
 
     def plot_from_server(self):
+        """Function to plot the loaded trace from the server and link the local variables to the downloaded data."""
         filtered = self.trace_loaded.filter("highpass", freq=0.5)
 
         self.trace_loaded = filtered.merge(method=1)
@@ -473,10 +493,13 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         new_job = multiprocessing.Process(target=self.pinta_trace(), args=())
         new_job.start()
         time.sleep(2)
-        # self.pinta_trace()
 
+
+    """
+    TILL HERE CHECKED
+    """
     def pinta_trace(self):
-        self.x1, self.x2, self.y1, self.y2 = 0, 0, 0, 0
+        self.x1, self.x2 = 0, 0
         if self.ax is not None:
             self.ax.cla()
 
@@ -500,8 +523,8 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         gc.collect()
 
     def pinta_spectrogram(self):
-        # print self.x1, self.x2
-        if (self.x1 <= 0) or (self.x2 >= len(self.active_trace.data)) or (self.y1 == self.y2):
+
+        if (self.x1 <= 0) or (self.x2 >= len(self.active_trace.data)):
             self.msg_box("No active window is selected",
                          "Please, select one point the trace and drag along the time axis.")
         else:
@@ -520,7 +543,7 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
 
     def pinta_fft(self):
         # print self.x1, self.x2
-        if (self.x1 <= 0) or (self.x2 >= len(self.active_trace.data)) or (self.y1 == self.y2):
+        if (self.x1 <= 0) or (self.x2 >= len(self.active_trace.data)):
             self.msg_box("No active window is selected",
                          "Please, select one point the trace and drag along the time axis.")
         else:
@@ -566,18 +589,6 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
                 self.ax2.plot(frq[1:], abs(Y)[1:], 'r')
                 self.ax2.set_xlim(0, 20)
                 self.canvas_fft.draw()
-
-    def load_pickle(self, filename):
-
-        try:
-            f = open(filename, 'rb')
-            loaded_object = cPickle.load(f)
-            f.close()
-            return loaded_object
-        except (IOError, OSError) as e:
-            pass
-
-
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

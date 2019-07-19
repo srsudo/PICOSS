@@ -32,11 +32,51 @@ def msg_box(msg1, msg2):
         return True
 
 
-def web_info(browserpath):
+def check_digits(number):
+    """
+    Function that check the input canvas to see if is a number or not
+    Args:
+        number: str
+            The number we want to check
+    Returns:
+    bool
+        True if success, False otherwise
+    """
+    if number.replace('.', '', 1).isdigit():
+        return True
+    elif number.isdigit():
+        return True
+    else:
+        return False
+
+
+def check_emptiness(param):
+    """
+    Function that checks a canvas to see if is empty or not
+    Args:
+        param : str
+        The string we want to check if is empty or not
+    Returns:
+    Bool
+        True if empty, False if not.
+    """
+    if param not in ['\n', '\r\n']:
+        return True
+    else:
+        return False
+
+
+
+def load_picking_dictionary(filename):
+    pass
+
+
+
+def web_info(browser_path):
     """
     Function that given a browser path, opens a related information webpage about it.
     Args:
-        browserpath: str:
+        browser_path: str:
             The browserpath we would like to open
     """
-    webbrowser.open(browserpath)
+    webbrowser.open(browser_path)
