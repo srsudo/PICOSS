@@ -6,8 +6,9 @@ from PyQt4 import QtGui
 import picoss_main
 from menus import DialogFolder
 from menus import DialogConnection
+import gui_functions
 from obspy import UTCDateTime
-
+import gc
 
 
 class WindowLoadFolder(QtGui.QMainWindow, DialogFolder.Ui_MainWindow):
@@ -73,24 +74,24 @@ class ChildWindowConnection(QtGui.QMainWindow, DialogConnection.Ui_MainWindow):
             from obspy.clients.seedlink import Client as SClient
             self.cnt = SClient(self.ip_address, int(self.port))
         elif client == 'FDSN':
-            pass
-            # elf.cnt = FClient(self.ip_address, self.port)
+            from obspy.clients.fdsn import Client as FClient
+            self.cnt = FClient(self.ip_address, self.port)
         elif client == 'arclink':
-            pass
-            # self.cnt = AClient(self.ip_address, int(self.port))
+            from obspy.clients.arclink import Client as AClient
+            self.cnt = AClient(self.ip_address, int(self.port))
         else:
             from obspy.clients.iris import Client as IClient
             self.cnt = IClient("IRIS")
 
     def requestdata(self):
+
         self.ip_address = self.ip_c.text()
         self.port = int(self.port_c.text())
 
-        """
-        if (ip_address == '' or port == ''):
-            self.parent().msg_box("IP address or port seems empty", "Please, enter data correctly!")
+        if self.ip_address == '' or self.port == '':
+            gui_functions.msg_box("IP address or port seems empty", "Please, enter data correctly!")
         else:
-        """
+
 
         self.parent().network = str(self.network_c.text())
         self.parent().station = str(self.station_c.text())
@@ -110,6 +111,8 @@ class ChildWindowConnection(QtGui.QMainWindow, DialogConnection.Ui_MainWindow):
                                     self.parent().start_data,
                                     self.parent().end_data)
 
+
+        # a test trace below for test. Remove on final versions.
         # st = "9702-10-1441-50S.MVO_18_1" #this is only from test!!
         self.parent().trace_loaded = st
         self.parent().stream = st
