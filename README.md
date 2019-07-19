@@ -37,7 +37,7 @@ examples about how to use PICOSS, please refer to the [tutorial](https://github.
 
 * 0.1.0
     * First release with expanded functionalities
-    * code-ready for submission
+    * code-ready for submission at journal
 * 0.0.1
     * Work in progress
 
