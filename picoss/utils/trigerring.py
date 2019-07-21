@@ -8,7 +8,7 @@ import obspy
 from obspy.signal.trigger import trigger_onset, recursive_sta_lta
 from tqdm import tqdm
 
-from knowaves_utils import save_pickle, load_pickle
+from picos_utils import save_pickle, load_pickle
 
 ############################################
 # PARAMETERS - typically taken from the bash file.

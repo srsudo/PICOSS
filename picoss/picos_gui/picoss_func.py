@@ -19,6 +19,7 @@ from menus import DialogComponents
 from menus import DialogStations
 from menus import DialogFiltering
 from menus import DialogPickingFile
+from menus import DialogSave
 
 import gui_functions
 
@@ -531,3 +532,34 @@ class WindowPicklingFile(QtGui.QMainWindow, DialogPickingFile.Ui_MainWindow):
         self.autocomplete(self.filename)
 
 
+class WindowSaving(QtGui.QMainWindow, DialogSave.Ui_MainWindow):
+
+    def __init__(self, parent):
+        super(WindowSaving, self).__init__(parent)
+        self.setupUi(self)
+        self.parentWindow = picoss_main.Ui_MainWindow
+        # Here, we should add the listener
+        self.segmentation_table = self.parent().segmentation_table
+        self.toSave = None
+        self.filename.setText(str(self.parent().toSave))
+        self.label_4.setText("segmented_data/")
+        # Here, we should add the listener
+        self.pushButton.clicked.connect(self.browse)
+        self.buttonCancel.clicked.connect(self.cancel)
+        self.buttonSave.clicked.connect(self.save_data)
+
+
+    def browse(self):
+        destination_folder = str(QtGui.QFileDialog.getExistingDirectory(None, "Select Folder"))
+        self.label_4.setText(destination_folder)
+
+    def cancel(self):
+        self.close()
+        gc.collect()
+
+    def save_data(self):
+        destination_folder = str(self.label_4.text())
+        self.toSave = str(self.filename.text())
+        data_format = str(self.comboBox.currentText())
+        gui_functions.save_segmentation_table(destination_folder, self.toSave, data_format, self.segmentation_table)
+        self.close()

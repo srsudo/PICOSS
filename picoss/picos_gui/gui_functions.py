@@ -3,9 +3,14 @@
 """
 This script includes generic functionalities for the main interface
 """
+import sys
+sys.path.append('..')
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 import webbrowser
+import numpy as np
+from scipy import io
+from utils import picos_utils
 
 
 def msg_box(msg1, msg2):
@@ -22,7 +27,7 @@ def msg_box(msg1, msg2):
     -------
     """
 
-    msgBox = QtGui.QMessageBox(self)
+    msgBox = QtGui.QMessageBox()
     msgBox.setIcon(QtGui.QMessageBox.Information)
     msgBox.setText(msg1)
     msgBox.setInformativeText(msg2)
@@ -66,10 +71,8 @@ def check_emptiness(param):
         return False
 
 
-
 def load_picking_dictionary(filename):
     pass
-
 
 
 def web_info(browser_path):
@@ -80,3 +83,39 @@ def web_info(browser_path):
             The browserpath we would like to open
     """
     webbrowser.open(browser_path)
+
+
+def save_segmentation_table(destination_folder, filename, data_format, segmentation_table):
+    """
+    FIle that given the destination folder, the filename, the data format and the segmentation table,
+    it checks the extension and save it in a folder.
+    Args:
+        destination_folder : str
+            The destination folder where we want to save the file
+        filename : str
+            The filename where we wouldlike to save it
+        data_format : str
+            The type of data format (.npy, .mat or .save) that we would like to save the data
+        segmentation_table : dict
+            A dict containing the segmentation table from our results
+
+    Returns:
+    Bool
+        True if saved properly, false otherwise.
+    """
+
+    file_toSave = "%s%s%s" % (destination_folder, filename, data_format)
+
+    try:
+        if data_format == ".npy":
+            np.save(file_toSave, segmentation_table)
+        elif data_format == ".p":
+            picos_utils.save_pickle(destination_folder, filename+data_format, segmentation_table)
+        else:
+            """Serialize an object into matlab format."""
+            io.savemat(file_toSave, mdict={'arr': segmentation_table})
+
+    except IOError as e:
+
+        print(e.errno)
+
