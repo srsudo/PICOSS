@@ -244,9 +244,9 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         self.on_of = dict_loaded['on_of']
         self.fm = 100.0
         # self.fm = float(dict_loaded['fm']) # load the sampling_frequency.
-        self.plot_stalta(self.on_of)
+        self.plot_trigger(self.on_of)
 
-    def plot_stalta(self, on_of):
+    def plot_trigger(self, on_of):
         """
         Function that load the previously pre-processed STA/LTA file as a dictionary file.
         Notice that in order to make this function work, it must be pre-processed using the included CLI,

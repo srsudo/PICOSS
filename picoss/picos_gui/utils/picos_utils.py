@@ -1,6 +1,6 @@
 """
 
-Authors: Angel Bueno, Alejandro Diaz.
+Authors: Angel Bueno, Alejandro Diaz, S. De Angelis and Luciano Zuccarello.
 
 PICOSS main script for numerical operations.
 
@@ -26,7 +26,6 @@ import os
 import numpy as np
 from six.moves import cPickle
 import matplotlib.pyplot as plt
-import scipy
 from obspy.signal.trigger import classic_sta_lta, recursive_sta_lta, delayed_sta_lta, trigger_onset
 from scipy.signal import lfilter, hilbert
 
@@ -441,6 +440,9 @@ def compute_ampa(data, fm, window, bandwidth, f_init, f_end, overlap, noise_thre
             break
 
     on = np.vstack(on)
-    print on.shape
     del fc, delta
     return on
+
+
+def run_classification_fi(data, f):
+    pass

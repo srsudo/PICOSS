@@ -47,7 +47,7 @@ class WindowLoadFolder(QtGui.QMainWindow, DialogFolder.Ui_MainWindow):
             self.parent().msg_box("Can not submit without a file!", "Choose one file")
         elif self.filename is not None and self.sta_lta:
             self.update_parent_fromText()
-            self.parent().plot_stalta()
+            self.parent().plot_trigger()
             self.close()
 
         else:
@@ -608,7 +608,7 @@ class WindowPickingOnFly(QtGui.QMainWindow, DialogTrigger.Ui_MainWindow):
         cft, on_of = utils.picos_utils.compute_sta_lta(data, self.parent().fm,  kind, nlta=nlta,
                                                        nsta=nsta, trig_on=tgon, trig_off=toff)
 
-        self.parent().plot_stalta(on_of)
+        self.parent().trigger(on_of)
         self.close()
         gc.collect()
 
@@ -733,11 +733,9 @@ class WindowAmpa(QtGui.QMainWindow, DialogAmpa.Ui_MainWindow):
         on_of = utils.picos_utils.compute_ampa(data, self.parent().fm, window, bandwidth, initfreq, endfreq, overlap,
                                                noise, uvalue, beta, L_filters)
 
-        self.parent().plot_stalta(on_of)
+        self.parent().plot_trigger(on_of)
         del trace, data
         self.close()
-
-
 
 
     def update_rows(self):
