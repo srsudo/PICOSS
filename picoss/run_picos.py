@@ -24,7 +24,7 @@ from picos_gui import picoss_main
 from picos_gui import picoss_func
 from picos_gui import gui_functions
 
-from utils import picos_utils
+from picoss.picos_gui.utils import picos_utils
 import picoss_config
 
 # Numerical Computation packages
@@ -43,6 +43,7 @@ import obspy
 # Others
 import gc
 import webbrowser
+
 gc.enable()
 
 
@@ -67,14 +68,13 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         self.day_of_the_year = None
         self.duration = 0
         # String to save
-        self.destination_folder = picoss_config.destination_folder
+        self.destination_folder = ""
 
         self.toSave = None
 
         self.fm = 0  # Sampling Frequency, depends of the active trace
         self.ts = 0  # Time frequency interval. Depends of the trace
-        self.fft_points = picoss_config.nfft  # Number of the fft points.
-        self.highpass_freq = picoss_config.highpass  # highpass frequency default for the active trace.
+        self.highpass_freq = 0.5  # highpass frequency default for the active trace.
 
         self.stream = None
         self.active_trace = None
@@ -98,7 +98,6 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
 
         # Segmentation table results
         self.segmentation_table = None
-
 
         # buttons action definition
         self.btnfft.clicked.connect(self.paint_fft)  # button for the FFT
@@ -144,6 +143,13 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         self.menu_detection.addAction('&Load picking file', self.load_picking_results)
         self.menuBar().addMenu(self.menu_detection)
 
+
+        # Functionalities for the Detection
+        self.menu_classification = QtGui.QMenu("&Classification", self)
+        self.menu_classification.addAction('&FI', self.showFI)
+        self.menu_classification.addAction('&Machine Learning', self.showML)
+        self.menuBar().addMenu(self.menu_classification)
+
         # Zoom and span buttons
         self.menu_toggle = QtGui.QMenu("&Zoom&Span", self)
         self.menu_toggle.addAction("Zoom", self.toggle_zoom, QtCore.Qt.CTRL + QtCore.Qt.Key_Z)
@@ -163,13 +169,13 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         self.toolbar_trace = None
 
     def pop_howtoMenu(self):
-        webbrowser.open(os.path.join(picoss_config.webpage_project, "info", "howto"))
+        webbrowser.open(os.path.join("https://github.com/srsudo/picos/tree/master", "info", "howto"))
 
     def pop_about(self):
-        webbrowser.open(os.path.join(picoss_config.webpage_project, "info", "about.ipynb"))
+        webbrowser.open(os.path.join("https://github.com/srsudo/picos/tree/master", "info", "about.ipynb"))
 
     def pop_seismology(self):
-        webbrowser.open(os.path.join(picoss_config.webpage_project, "info", "seismology"))
+        webbrowser.open(os.path.join("https://github.com/srsudo/picos/tree/master", "info", "seismology"))
 
     def check_plots(self):
         """Function to axis plots."""
@@ -179,6 +185,13 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
     """
     Functions to connect with Other Menus
     """
+
+    def showFI(self):
+        pass
+
+    def showML(self):
+        pass
+
 
     def show_isolated(self):
         """
@@ -201,10 +214,10 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         stalta = picoss_func.WindowPicklingFile(self).show()
 
     def show_STALTA(self):
-        pass
+        sta_lta = picoss_func.WindowPickingOnFly(self).show()
 
     def show_AMPA(self):
-        pass
+        ampa = picoss_func.WindowAmpa(self).show()
 
     def show_save_menu(self):
         save_menu = picoss_func.WindowSaving(self).show()
@@ -217,31 +230,40 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
     End of Functions to connect with Other Menus
     """
 
-    def plot_stalta(self):
-
+    def process_triggerfile(self, dictionary):
         """
-        Function that load the previously pre-processed STA/LTA file as a dictionary file.
-        Notice that in order to make this function work, it must be pre-processed using the included CLI,
+        Function that loads the previously pre-processed STA/LTA file as a dictionary file.
+        Notice that in order to make this function to work, the trace must be pre-processed using the CLI,
         specifically, the make_stalta.sh script
-
-        A own dictionary from another picking file, BUT with the following fields is also possible:
-            'data' -> (the seismic data we want to process as a NUmpy Array)
-            'on of' -> an activation vector with triggers on and off times
-            'fm' -> the sampling frequency we are working with.
-
         """
 
-        dict_loaded = picos_utils.load_picking_file(self.trace_loaded_filename)
+        dict_loaded = picos_utils.load_picking_file(dictionary)
         datos = obspy.core.trace.Trace(data=dict_loaded['data'])
         self.active_trace = datos.copy()
         self.stream = obspy.core.stream.Stream(traces=[self.active_trace])
         self.on_of = dict_loaded['on_of']
         self.fm = 100.0
-        #self.fm = float(dict_loaded['fm']) # load the sampling_frequency.
-        time_Vector = np.linspace(0, self.active_trace.data.shape[0] / self.fm, num=self.active_trace.data.shape[0])
+        # self.fm = float(dict_loaded['fm']) # load the sampling_frequency.
+        self.plot_stalta(self.on_of)
 
-        self.toSave = "%s_%s_%s_%s_%s_%s.save" % (
-            self.network, self.station, self.channel, self.location, self.day_of_the_year, time_Vector.shape[0])
+    def plot_stalta(self, on_of):
+        """
+        Function that load the previously pre-processed STA/LTA file as a dictionary file.
+        Notice that in order to make this function work, it must be pre-processed using the included CLI,
+        specifically, the make_stalta.sh script
+
+        A own dictionary from another picking file, BUT with the following fields are also possible:
+            'data' -> (the seismic data we want to process as a Numpy Array)
+            'on of' -> an activation vector with triggers on and off times
+            'fm' -> the sampling frequency we are working with.
+
+        Args:
+            on_of : tuple
+                The tuple of activation times for the times
+
+        """
+
+        time_Vector = np.linspace(0, self.active_trace.data.shape[0] / self.fm, num=self.active_trace.data.shape[0])
 
         # create an axis
         self.ax = self.figura_traza.add_subplot(111)
@@ -255,7 +277,7 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
                                           minspanx=5, minspany=5, spancoords='pixels',
                                           interactive=True)
         ymin, ymax = self.ax.get_ylim()
-        self.ax.vlines(self.on_of[:, 0] / self.fm, ymin, ymax, color='r', linewidth=1)
+        self.ax.vlines(on_of[:, 0] / self.fm, ymin, ymax, color='r', linewidth=1)
         self.ax.axvline(self.first_ticked, color='green', linestyle='solid')
         self.ax.axvline(self.last_ticked, color='magenta', linestyle='dashed')
         self.canvas_traza.draw()
@@ -362,11 +384,9 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
                        alumni_toSave]
                 segmentation_table.append(new)
 
-            self.segmentation_table = [1,2,3]
             self.toSave = "%s_%s_%s_%s_%s_%s_%s" % (self.network, self.station, self.channel, self.location,
-                                                         self.start_data.year, self.day_of_the_year, self.duration)
+                                                    self.start_data.year, self.day_of_the_year, self.duration)
 
-            #picos_utils.save_pickle(self.destination_folder, self.toSave, segmentation_table)
             # Clean the figures to free memory and allow further plotting.
             self.clean_table()
             self.clean_figures()
@@ -387,6 +407,10 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         self.x2 = 0
         self.first_ticked = 0
         self.last_ticked = 0
+
+    def clean_canvas(self):
+        self.figura_traza.clf()
+        self.canvas_traza.draw()
 
     def clean_figures(self):
         """function to clean the figures and ticked points"""
@@ -484,7 +508,7 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
             self.duration = int(math.ceil(self.end_data - self.start_data))  # duration in seconds, rounded up
             self.ts = 1 / float(self.fm)
 
-            new_job = multiprocessing.Process(target=self.paint_trace(), args= ())
+            new_job = multiprocessing.Process(target=self.paint_trace(), args=())
             new_job.start()
             time.sleep(1)
 
@@ -551,7 +575,7 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         """
         if (self.x1 <= 0) or (self.x2 >= len(self.active_trace.data)):
             gui_functions.msg_box("No active window is selected",
-                         "Please, select one point the trace and drag along the time axis.")
+                                  "Please, select one point the trace and drag along the time axis.")
         else:
             if self.ax1 is not None:
                 self.ax1.cla()
@@ -572,7 +596,7 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         """
         if (self.x1 <= 0) or (self.x2 >= len(self.active_trace.data)):
             gui_functions.msg_box("No active window is selected",
-                         "Please, select one point the trace and drag along the time axis.")
+                                  "Please, select one point the trace and drag along the time axis.")
         else:
             if self.ax2 is not None:
                 self.ax2.cla()

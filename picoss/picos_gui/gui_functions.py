@@ -93,7 +93,7 @@ def save_segmentation_table(destination_folder, filename, data_format, segmentat
         destination_folder : str
             The destination folder where we want to save the file
         filename : str
-            The filename where we wouldlike to save it
+            The filename where we would like to save it
         data_format : str
             The type of data format (.npy, .mat or .save) that we would like to save the data
         segmentation_table : dict
@@ -118,4 +118,3 @@ def save_segmentation_table(destination_folder, filename, data_format, segmentat
     except IOError as e:
 
         print(e.errno)
-

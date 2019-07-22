@@ -4,6 +4,7 @@ import gc
 import numpy as np
 import obspy
 import math
+import multiprocessing
 from obspy import UTCDateTime
 
 # Graphical Packages
@@ -20,9 +21,11 @@ from menus import DialogStations
 from menus import DialogFiltering
 from menus import DialogPickingFile
 from menus import DialogSave
+from menus import DialogTrigger
+from menus import DialogAmpa
 
 import gui_functions
-
+import utils
 
 class WindowLoadFolder(QtGui.QMainWindow, DialogFolder.Ui_MainWindow):
     """ This class handles the data loading from an input folder.
@@ -501,14 +504,18 @@ class WindowPicklingFile(QtGui.QMainWindow, DialogPickingFile.Ui_MainWindow):
             self.parent().msg_box("Can not plot without preprocessed file!", "Choose one preprocessed file")
         elif self.filename is not None:
             self.update_parent_fromText()
-            self.parent().plot_stalta()
+            self.parent().clean_figures()
+            self.parent().clean_points()
+            self.parent().clean_canvas()
+            self.parent().process_triggerfile(str(self.filename))
             self.close()
 
         else:
-            # In case the file is chosen, we get the attributes we want (i should change this)
+            # In case the file is chosen, we get the attributes we want
             self.update_parent_fromText()
             self.parent().plot_from_file()
             self.close()
+
 
     def update_parent_fromText(self):
         self.parent().station = str(self.station_2.text())
@@ -533,7 +540,11 @@ class WindowPicklingFile(QtGui.QMainWindow, DialogPickingFile.Ui_MainWindow):
 
 
 class WindowSaving(QtGui.QMainWindow, DialogSave.Ui_MainWindow):
-
+    """
+    Function that handles the stations required for saving the data in multiple formats.
+    As a default "segmented_data" is given as the default folder, but users cans elect and move within their own data
+    structure. Alternatively, other data files can be loaded within the interface.
+    """
     def __init__(self, parent):
         super(WindowSaving, self).__init__(parent)
         self.setupUi(self)
@@ -550,16 +561,194 @@ class WindowSaving(QtGui.QMainWindow, DialogSave.Ui_MainWindow):
 
 
     def browse(self):
+        """Function to browse the folder structure to save a specific file"""
         destination_folder = str(QtGui.QFileDialog.getExistingDirectory(None, "Select Folder"))
         self.label_4.setText(destination_folder)
 
     def cancel(self):
+        """Close the interface"""
         self.close()
         gc.collect()
 
     def save_data(self):
+        """save the data within the selected folder"""
         destination_folder = str(self.label_4.text())
         self.toSave = str(self.filename.text())
         data_format = str(self.comboBox.currentText())
         gui_functions.save_segmentation_table(destination_folder, self.toSave, data_format, self.segmentation_table)
         self.close()
+
+
+class WindowPickingOnFly(QtGui.QMainWindow, DialogTrigger.Ui_MainWindow):
+    """
+    Function that handles the computation of STA/LTA files, and interfaces with the main GUI with the triggering and
+    plotting functionalities. Alternatively, other data files can be loaded within the interface.
+    """
+    def __init__(self, parent):
+        super(WindowPickingOnFly, self).__init__(parent)
+        self.setupUi(self)
+        self.parentWindow = picoss_main.Ui_MainWindow
+
+        self.buttonComputePlot.clicked.connect(self.compute_plot)
+        self.buttonCancel.clicked.connect(self.cancel)
+        self.label_loaded.setText(str(self.parent().trace_loaded_filename))
+
+    def compute_plot(self):
+        # get the data from the parent and compute
+        new_job = multiprocessing.Process(target=self.parent().clean_figures(), args=())
+        new_job_main = multiprocessing.Process(target=self.parent().clean_canvas(), args=())
+        new_job.start()
+        new_job_main.start()
+        # Get the info and compute
+        kind, nlta, nsta, tgon, toff = self.get_info()
+
+        trace = self.parent().active_trace.copy()  # we copy the data to avoid numerical errors.
+        data = utils.picos_utils.check_masked_array(trace.data)
+
+        cft, on_of = utils.picos_utils.compute_sta_lta(data, self.parent().fm,  kind, nlta=nlta,
+                                                       nsta=nsta, trig_on=tgon, trig_off=toff)
+
+        self.parent().plot_stalta(on_of)
+        self.close()
+        gc.collect()
+
+    def cancel(self):
+        """close the window"""
+        self.close()
+        gc.collect()
+
+    def get_info(self):
+        """
+        Get the information required for the STA/LTA algorithm, along with the type of STA/LTA we want to run
+        Returns:
+            kind : str
+                The type of filter we want to have
+            nlta : float
+                The length of the LTA window (s)
+            nsta : float
+                The length of the STA window (s)
+            tgon : float
+                The trigger "on" to consider an activation
+            toff: float
+                The trigger "off to deactivate the trigger
+        """
+        nlta = float(self.spin_lta.value())
+        nsta = float(self.spin_sta.value())
+        tgon = float(self.trigg_on.value())
+        toff = float(self.trigg_of.value())
+        kind = str(self.comboTrigger.currentText()).split(" ")[0]
+
+        return kind, nlta, nsta, tgon, toff
+
+
+class WindowAmpa(QtGui.QMainWindow, DialogAmpa.Ui_MainWindow):
+    """
+    Function that handles the computation of STA/LTA files, and interfaces with the main GUI with the triggering and
+    plotting functionalities. Alternatively, other data files can be loaded within the interface.
+    """
+    def __init__(self, parent):
+        super(WindowAmpa, self).__init__(parent)
+        self.setupUi(self)
+        self.parentWindow = picoss_main.Ui_MainWindow
+
+        self.buttonComputePlot.clicked.connect(self.compute_ampa)
+        self.buttonCancel.clicked.connect(self.cancel)
+        self.pushButton.clicked.connect(self.add_filter)
+        self.label_loaded.setText(str(self.parent().trace_loaded_filename))
+
+
+    def compute_ampa(self):
+        # get the data from the parent and compute
+        new_job = multiprocessing.Process(target=self.parent().clean_figures(), args=())
+        new_job_main = multiprocessing.Process(target=self.parent().clean_canvas(), args=())
+        new_job.start()
+        new_job_main.start()
+        self.compute()
+
+
+    def cancel(self):
+        """close the window"""
+        self.close()
+        gc.collect()
+
+    def get_info_ampa(self):
+        """
+        Function that computes the information required for AMPA
+        Returns:
+            window : float
+                Initial frequency for AMPA
+            overlap : float
+                End frequency for AMPA
+            noise : float
+                The bandwith with the
+            uvalue : float
+                Impulssivenes of the filter response
+        """
+
+        window = float(self.windowAnalysis.value())
+        overlap = float(self.percOverlap.value())
+        noise = float(self.spinBox.value())
+        uvalue = float(self.uValue.value())
+
+        return window, overlap, noise, uvalue
+
+    def get_info_filters(self):
+        """
+        Function that gets the info of the filters
+        Returns:
+            initfreq : float
+                Initial frequency for AMPA
+            endfreq : float
+                End frequency for AMPA
+            bandwidth : float
+                The bandwith with the
+            beta : float
+                Impulssivenes of the filter response
+            L_filters : list
+                The list of filters we will use
+        """
+        initfreq = float(self.initialfreq.value())
+        endfreq = float(self.endfreq.value())
+        bandwidth = float(self.bandWidth.value())
+        beta = float(self.lcoefficient.value())
+        L_filters = []
+
+        # we recover the correspondent value. CHanges this part in a future
+        for row in xrange(0, self.tableWidget.rowCount()):
+            value = str(self.tableWidget.item(row, 0).text())
+            if gui_functions.check_digits(value):
+                L_filters.append(value)
+
+        return [initfreq, endfreq, bandwidth, beta, L_filters]
+
+
+    def compute(self):
+
+        [window, overlap, noise, uvalue] = self.get_info_ampa()
+        [initfreq, endfreq, bandwidth, beta, L_filters] = self.get_info_filters()
+
+        trace = self.parent().active_trace.copy()  # we copy the data to avoid numerical errors.
+        data = utils.picos_utils.check_masked_array(trace.data)
+
+        on_of = utils.picos_utils.compute_ampa(data, self.parent().fm, window, bandwidth, initfreq, endfreq, overlap,
+                                               noise, uvalue, beta, L_filters)
+
+        self.parent().plot_stalta(on_of)
+        del trace, data
+        self.close()
+
+
+
+
+    def update_rows(self):
+        numrows = self.tableWidget.rowCount()
+        new_headers = ["Filter %s" % x for x in xrange(1, numrows)]
+        self.tableWidget.setVerticalHeaderLabels(new_headers)
+
+    def add_filter(self):
+        row = self.tableWidget.rowCount()
+        self.tableWidget.insertRow(row)
+        numrows = self.tableWidget.rowCount()
+        self.tableWidget.setItem(numrows -1, 0, QtGui.QTableWidgetItem("Write value"))
+        self.tableWidget.item(numrows-1, 0).setBackground(QtCore.Qt.green)
+        self.update_rows()
