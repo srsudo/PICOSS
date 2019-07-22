@@ -131,27 +131,17 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "STA/LTA and triggering options", None))
-        self.label.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:11pt; font-weight:600;\">Loaded Trace</span></p></body></html>", None))
-        self.label_3.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:11pt; font-weight:600;\">Trigger Type</span></p></body></html>", None))
-        self.comboTrigger.setItemText(0, _translate("MainWindow", "Recursive (STA/LTA)", None))
-        self.comboTrigger.setItemText(1, _translate("MainWindow", "Classic (STA/LTA)", None))
-        self.comboTrigger.setItemText(2, _translate("MainWindow", "Delayed (STA/LTA)", None))
-        self.label_4.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:18pt; font-weight:600;\">Generic STA/LTA Settings</span></p></body></html>", None))
-        self.label_6.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">Modify Trigger Parameters </span></p></body></html>", None))
-        self.label_2.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:11pt; font-weight:600;\">Short Time Average Window (s)</span></p></body></html>", None))
-        self.label_5.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:11pt; font-weight:600;\">Long Time Average Window (s)</span></p></body></html>", None))
-        self.label_7.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Triggering on </span></p></body></html>", None))
-        self.label_8.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Triggering off</span></p></body></html>", None))
-        self.buttonCancel.setText(_translate("MainWindow", "Cancel", None))
-        self.buttonComputePlot.setText(_translate("MainWindow", "Compute/Plot", None))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    MainWindow = QtGui.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+        self.label.setText(_translate("STA/LTA and triggering options", "<html><head/><body><p align=\"center\"><span style=\" font-size:11pt; font-weight:600;\">Loaded Trace</span></p></body></html>", None))
+        self.label_3.setText(_translate("STA/LTA and triggering options", "<html><head/><body><p align=\"center\"><span style=\" font-size:11pt; font-weight:600;\">Trigger Type</span></p></body></html>", None))
+        self.comboTrigger.setItemText(0, _translate("STA/LTA and triggering options", "Recursive (STA/LTA)", None))
+        self.comboTrigger.setItemText(1, _translate("STA/LTA and triggering options", "Classic (STA/LTA)", None))
+        self.comboTrigger.setItemText(2, _translate("STA/LTA and triggering options", "Delayed (STA/LTA)", None))
+        self.label_4.setText(_translate("STA/LTA and triggering options", "<html><head/><body><p align=\"center\"><span style=\" font-size:18pt; font-weight:600;\">Generic STA/LTA Settings</span></p></body></html>", None))
+        self.label_6.setText(_translate("STA/LTA and triggering options", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">Modify Trigger Parameters </span></p></body></html>", None))
+        self.label_2.setText(_translate("STA/LTA and triggering options", "<html><head/><body><p align=\"center\"><span style=\" font-size:11pt; font-weight:600;\">Short Time Average Window (s)</span></p></body></html>", None))
+        self.label_5.setText(_translate("STA/LTA and triggering options", "<html><head/><body><p align=\"center\"><span style=\" font-size:11pt; font-weight:600;\">Long Time Average Window (s)</span></p></body></html>", None))
+        self.label_7.setText(_translate("STA/LTA and triggering options", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Triggering on </span></p></body></html>", None))
+        self.label_8.setText(_translate("STA/LTA and triggering options", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Triggering off</span></p></body></html>", None))
+        self.buttonCancel.setText(_translate("STA/LTA and triggering options", "Cancel", None))
+        self.buttonComputePlot.setText(_translate("STA/LTA and triggering options", "Compute/Plot", None))
 

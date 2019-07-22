@@ -100,12 +100,12 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "Select From Folder", None))
-        self.label_7.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Network</span></p></body></html>", None))
-        self.label_8.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Station  </span></p></body></html>", None))
-        self.label_9.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Channel</span></p></body></html>", None))
-        self.label_10.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Location</span></p></body></html>", None))
-        self.label_12.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Filename</span></p></body></html>", None))
-        self.pushButton_3.setText(_translate("MainWindow", "Load", None))
-        self.pushButton_4.setText(_translate("MainWindow", "Plot ", None))
-        self.label.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Day of Year</span></p></body></html>", None))
+        self.label_7.setText(_translate("Select From Folder", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Network</span></p></body></html>", None))
+        self.label_8.setText(_translate("Select From Folder", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Station  </span></p></body></html>", None))
+        self.label_9.setText(_translate("Select From Folder", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Channel</span></p></body></html>", None))
+        self.label_10.setText(_translate("Select From Folder", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Location</span></p></body></html>", None))
+        self.label_12.setText(_translate("Select From Folder", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Filename</span></p></body></html>", None))
+        self.pushButton_3.setText(_translate("Select From Folder", "Load", None))
+        self.pushButton_4.setText(_translate("Select From Folder", "Plot ", None))
+        self.label.setText(_translate("Select From Folder", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Day of Year</span></p></body></html>", None))
 

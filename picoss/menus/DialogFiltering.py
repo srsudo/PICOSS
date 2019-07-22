@@ -115,12 +115,12 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "Frequency and Filtering", None))
-        self.label.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Sampling Frequency (Hz)</span></p></body></html>", None))
-        self.label_4.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Highpass-filter</span></p></body></html>", None))
-        self.label_2.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Filter Corner Frequency</span></p></body></html>", None))
-        self.label_3.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Loaded Trace</span></p></body></html>", None))
-        self.label_6.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">BandPass Filter</span></p></body></html>", None))
-        self.label_5.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Upper frequency (Hz)</span></p></body></html>", None))
-        self.label_7.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Down Frequency (Hz)</span></p></body></html>", None))
-        self.replot.setText(_translate("MainWindow", "Plot ", None))
+        self.label.setText(_translate("Frequency and Filtering", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Sampling Frequency (Hz)</span></p></body></html>", None))
+        self.label_4.setText(_translate("Frequency and Filtering", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Highpass-filter</span></p></body></html>", None))
+        self.label_2.setText(_translate("Frequency and Filtering", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Filter Corner Frequency</span></p></body></html>", None))
+        self.label_3.setText(_translate("Frequency and Filtering", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Loaded Trace</span></p></body></html>", None))
+        self.label_6.setText(_translate("Frequency and Filtering", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">BandPass Filter</span></p></body></html>", None))
+        self.label_5.setText(_translate("Frequency and Filtering", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Upper frequency (Hz)</span></p></body></html>", None))
+        self.label_7.setText(_translate("Frequency and Filtering", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Down Frequency (Hz)</span></p></body></html>", None))
+        self.replot.setText(_translate("Frequency and Filtering", "Plot ", None))
 

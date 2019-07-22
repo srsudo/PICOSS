@@ -217,6 +217,22 @@ def compute_fft(signal, fm):
     return y, frq
 
 
+def compute_ratio(signal, midpoint, fm):
+    """
+    Function to compute the HF/LF ratio of a given signal, using
+    :param signal: the signal we want to compute the HF/LF ratio.
+    :param fm: the sampling frequency.
+    :return: float . the HF/LF ratio.
+    """
+    fft, freqs = compute_fft(signal, fm)
+
+    low_band = np.abs(fft[(freqs >= 1) & (freqs <= midpoint)])
+    high_band = np.abs(fft[(freqs >= midpoint) & (freqs <= 20)])
+    ratio = np.log10(np.mean(np.sum(high_band)) / np.mean(np.sum(low_band)))
+
+    return ratio
+
+
 def check_masked_array(array):
     """
     Check masked array. Some seismic data is loaded as a masked array, which can lead to numerical problems.

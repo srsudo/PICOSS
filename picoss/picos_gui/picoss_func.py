@@ -23,6 +23,7 @@ from menus import DialogPickingFile
 from menus import DialogSave
 from menus import DialogTrigger
 from menus import DialogAmpa
+from menus import DialogFI
 
 import gui_functions
 import utils
@@ -721,9 +722,8 @@ class WindowAmpa(QtGui.QMainWindow, DialogAmpa.Ui_MainWindow):
 
         return [initfreq, endfreq, bandwidth, beta, L_filters]
 
-
     def compute(self):
-
+        """Function to link and compute the AMPA method"""
         [window, overlap, noise, uvalue] = self.get_info_ampa()
         [initfreq, endfreq, bandwidth, beta, L_filters] = self.get_info_filters()
 
@@ -750,3 +750,31 @@ class WindowAmpa(QtGui.QMainWindow, DialogAmpa.Ui_MainWindow):
         self.tableWidget.setItem(numrows -1, 0, QtGui.QTableWidgetItem("Write value"))
         self.tableWidget.item(numrows-1, 0).setBackground(QtCore.Qt.green)
         self.update_rows()
+
+
+class WindowFI(QtGui.QMainWindow, DialogFI.Ui_MainWindow):
+    """
+    Function that handles the computation of STA/LTA files, and interfaces with the main GUI with the triggering and
+    plotting functionalities. Alternatively, other data files can be loaded within the interface.
+    """
+    def __init__(self, parent):
+        super(WindowFI, self).__init__(parent)
+        self.setupUi(self)
+        self.parentWindow = picoss_main.Ui_MainWindow
+
+
+    def compute_plot(self):
+        # get the data from the parent and compute
+        pass
+
+        self.parent().trigger(on_of)
+        self.close()
+        gc.collect()
+
+    def cancel(self):
+        """close the window"""
+        self.close()
+        gc.collect()
+
+    def get_info(self):
+        pass

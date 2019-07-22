@@ -82,9 +82,9 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "Visualize other components", None))
-        self.label_6.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Other components to help in the visualization</span></p></body></html>", None))
-        self.pushButton_3.setText(_translate("MainWindow", "Load", None))
-        self.label_text_start.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">start-time</span></p></body></html>", None))
-        self.label_text_end.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">end label</span></p></body></html>", None))
-        self.pushfirst.setText(_translate("MainWindow", "Plot", None))
+        self.label_6.setText(_translate("Visualize other components", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Other components to help in the visualization</span></p></body></html>", None))
+        self.pushButton_3.setText(_translate("Visualize other components", "Load", None))
+        self.label_text_start.setText(_translate("Visualize other components", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">start-time</span></p></body></html>", None))
+        self.label_text_end.setText(_translate("Visualize other components", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">end label</span></p></body></html>", None))
+        self.pushfirst.setText(_translate("Visualize other components", "Plot", None))
 

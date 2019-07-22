@@ -187,7 +187,10 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
     """
 
     def showFI(self):
-        pass
+        """
+        Function to load the segmented data and compute the results.
+        """
+        fi_windows = picoss_func.WindowFI(self).show()
 
     def showML(self):
         pass

@@ -82,16 +82,16 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
-        self.label.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Destination Folder</span></p></body></html>", None))
-        self.pushButton.setText(_translate("MainWindow", "Browse Folder", None))
-        self.label_2.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Filename </span></p></body></html>", None))
-        self.label_3.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Saving Format</span></p><p align=\"center\"><br/></p></body></html>", None))
-        self.comboBox.setItemText(0, _translate("MainWindow", ".npy", None))
-        self.comboBox.setItemText(1, _translate("MainWindow", ".mat", None))
-        self.comboBox.setItemText(2, _translate("MainWindow", ".p", None))
-        self.buttonCancel.setText(_translate("MainWindow", "Cancel", None))
-        self.buttonSave.setText(_translate("MainWindow", "Save", None))
+        MainWindow.setWindowTitle(_translate("Save Segmentation Table", "Save Segmentation Table", None))
+        self.label.setText(_translate("Save Segmentation Table", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Destination Folder</span></p></body></html>", None))
+        self.pushButton.setText(_translate("Save Segmentation Table", "Browse Folder", None))
+        self.label_2.setText(_translate("Save Segmentation Table", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Filename </span></p></body></html>", None))
+        self.label_3.setText(_translate("Save Segmentation Table", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Saving Format</span></p><p align=\"center\"><br/></p></body></html>", None))
+        self.comboBox.setItemText(0, _translate("Save Segmentation Table", ".npy", None))
+        self.comboBox.setItemText(1, _translate("Save Segmentation Table", ".mat", None))
+        self.comboBox.setItemText(2, _translate("Save Segmentation Table", ".p", None))
+        self.buttonCancel.setText(_translate("Save Segmentation Table", "Cancel", None))
+        self.buttonSave.setText(_translate("Save Segmentation Table", "Save", None))
 
 
 if __name__ == "__main__":

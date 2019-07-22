@@ -99,13 +99,13 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(_translate("MainWindow", "Visualize Preprocessed Picking File", None))
-        self.label_7.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Network</span></p></body></html>", None))
-        self.label_8.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Station  </span></p></body></html>", None))
-        self.label_9.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Channel</span></p></body></html>", None))
-        self.label_10.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Location</span></p></body></html>", None))
-        self.label_12.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Filename</span></p></body></html>", None))
-        self.pushButton_3.setText(_translate("MainWindow", "Load Picking File", None))
-        self.pushButton_4.setText(_translate("MainWindow", "Plot Results", None))
-        self.label.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Day of Year</span></p></body></html>", None))
+        MainWindow.setWindowTitle(_translate("Visualize Preprocessed Picking File", "Visualize Preprocessed Picking File", None))
+        self.label_7.setText(_translate("Visualize Preprocessed Picking File", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Network</span></p></body></html>", None))
+        self.label_8.setText(_translate("Visualize Preprocessed Picking File", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Station  </span></p></body></html>", None))
+        self.label_9.setText(_translate("Visualize Preprocessed Picking File", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Channel</span></p></body></html>", None))
+        self.label_10.setText(_translate("Visualize Preprocessed Picking File", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Location</span></p></body></html>", None))
+        self.label_12.setText(_translate("Visualize Preprocessed Picking File", "<html><head/><body><p><span style=\" font-size:11pt; font-weight:600;\">Filename</span></p></body></html>", None))
+        self.pushButton_3.setText(_translate("Visualize Preprocessed Picking File", "Load Picking File", None))
+        self.pushButton_4.setText(_translate("Visualize Preprocessed Picking File", "Plot Results", None))
+        self.label.setText(_translate("Visualize Preprocessed Picking File", "<html><head/><body><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">Day of Year</span></p></body></html>", None))
 
