@@ -5,13 +5,7 @@ processed and stored in an correct format within the data folder (e.g: miniseed)
 such as IRIS. In practice, if the data can be stored in NumPy format, it can be read nby PICOSS. 
 
 PLease, make sure the required modules listed in "requirements.txt" are installed within the working Python environment 
-you are interfacing PICOSS with. 
-
-Additional functionalities are included to support the main program, including: 
-
-    * 
-    *
-    *
+you are interfacing PICOSS with.
 """
 
 # Graphical packages
