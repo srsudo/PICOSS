@@ -1,3 +1,4 @@
 .pyc
 run_picos(copy).py
 data/
+segmented_data/

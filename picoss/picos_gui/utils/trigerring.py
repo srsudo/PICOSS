@@ -15,12 +15,12 @@ from picos_utils import save_pickle, load_pickle, merge_numpy
 ############################################
 
 # Folders with all the data and stuff
-datafolder = "data_paper"
-dest_folder = "parametros_silvio"
+datafolder = "data"
+dest_folder = "picking_data"
 
 # Datasets selection. We shall pass to "cluster mode"
-datasets = ["YC"]
-stations = ['BELO', 'BESA', 'BERG']
+datasets = ["MV"]
+stations = ['MBGA']
 
 # frequency filters and stuff.
 bandpass = [2, 12]
@@ -41,7 +41,7 @@ def plot_results(tracename, data, cft, on_of, trig_on, trig_off):
     Function that plots the results of the triggering algorithm and plot it on standard matplotlib
     Args:
         tracename : str
-            The string of th
+            The string of the trace
         data:
         cft:
         on_of:

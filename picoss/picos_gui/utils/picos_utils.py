@@ -30,8 +30,9 @@ import obspy
 from obspy.signal.trigger import classic_sta_lta, recursive_sta_lta, delayed_sta_lta, trigger_onset
 from scipy.signal import lfilter, hilbert
 from scipy import io
+from scipy.stats import entropy as sci_entropy
 import gc
-
+from segment_axis import segment_axis
 
 def write_tofile(file_path, text):
     """
@@ -638,4 +639,147 @@ def compute_ampa(data, fm, window, bandwidth, f_init, f_end, overlap, noise_thre
     on = np.vstack(on)
     del fc, delta
     return on
+
+
+def run_segmentation(stream, data, on_of, delay_in, durations_window, epsilon=2.5, plot=False, cut="original"):
+
+    """ Function that executes the main segmentation. Additional pre-processing steps might be required. Please, refer
+    to the main manuscript and do cite if you are suing this algorithm:
+
+    Recursive Entropy Method of Segmentation for Seismic Signals. A. Bueno1, A. Diaz-Moreno, S. De Angelis,
+    C. Benitez and J.M.Ibanez. Seismological Research Letters (SRL).
+
+    It is assumed that the seismic data streams has been previously processed and stored in an correct format
+    (e.g: miniseed). In practice, if the data can be stored in NumPy format, it can be processed in Python.
+
+    or github.com/srsudo/remos for additional examples.
+
+    Parameters
+    ----------
+    stream: Stream Obspy
+        The original Stream Obspy object
+    data: Numpy Array
+        The PROCESSED data from the STA/LTA method
+    on_of:
+        The numpy matrix, size nsamples x 2, containing the timing
+    delay_in: float
+        The offset defined to cut from the estimated number of windows
+    durations_window: list
+        An array containing [W_s, W_d] the window search duration and the minimum window.
+    epsilon: float, optional
+        The threshold value for the entropy
+    plot: bool, optional
+        True if we want to plot eacf ot the segmented signals. Be vareful for long streams (>25 min)
+    cut:string, optional
+        "original" to cut from the main trace, or "processed" to cut from the STA/LTA filtered trace.
+    Returns
+    X: list
+        A list containing the [signal, FI_ratio, start, end]
+    -------
+    """
+
+    # we make a copy in memory of the original array
+    array_original = stream[0].copy()
+
+    # mean removal, high_pass filtering of earth noise background
+    array_original = array_original.detrend(type='demean')
+    array_original.data = obspy.signal.filter.highpass(array_original.data, 0.5, df=array_original.stats.sampling_rate)
+
+    fm = float(array_original.stats.sampling_rate)
+    X = []
+
+    window_size = durations_window[0]
+    search_window = durations_window[1]
+
+    data = data - np.mean(data)
+    processed_data = data.copy()
+
+    # use the percentile to reduce background
+    umbral = np.percentile(data, 80)
+    data = (data / float(umbral) * (data > umbral)) + (0 * (data <= umbral))
+
+    for m, k in enumerate(on_of):
+
+        # c = c + 1
+        start = int(k[0])
+        end = int(k[1])
+
+        x_0 = int(start - delay_in * fm)
+        x_1 = np.abs(x_0 - int(start - delay_in * fm + end + search_window * fm))
+
+        selected_candidate = np.asarray(data[x_0:x_1])
+        ventanas = segment_axis(selected_candidate.flatten(), int(window_size * fm), overlap=0)
+        energy_ventanas = energy_per_frame(ventanas)
+        total_energy = np.sum(energy_ventanas)
+        loq = energy_ventanas / float(total_energy)
+
+        if sci_entropy(loq) < epsilon:
+            cut_me = int(np.argmin(loq) * window_size * fm + delay_in * fm)
+            potential_candidate = array_original[x_0:cut_me + x_0]
+            duration_candidate = potential_candidate.shape[0] / float(fm)
+
+            if duration_candidate < 5.0:
+                # By doing this, we erase those windows with small durations
+                pass
+
+            else:
+
+                potential_candidate = potential_candidate - np.mean(potential_candidate)
+                ventanas_ref = segment_axis(potential_candidate.flatten(), int(5.0 * fm), overlap=0)
+
+                try:
+                    dsai = int((ventanas_ref.shape[0] / 2.0))
+                except:
+                    dsai = 0
+
+                try:
+                    down_windows = energy_per_frame(ventanas_ref[0:dsai])
+                    upper_windows = energy_per_frame(ventanas_ref[dsai:dsai + dsai])
+                    ratio = np.round(np.sum(np.asarray(upper_windows)) / np.sum(np.asarray(down_windows)), 2)
+                except:
+                    ratio = np.inf
+                    pass
+
+                if ratio < 0.15:
+                    # In this case, long-segmentation, re-cut.
+                    try:
+                        ind = np.sort(np.argpartition(upper_windows, 2)[:2])[0]
+                    except:
+                        # print "on exception"
+                        ind = upper_windows.shape[0]
+
+                    min_duration = (down_windows.shape[0] + ind) * 5.0 * fm
+                    cut_me = int(min_duration)
+
+            if cut == "original":
+                selected_candidate = array_original.data[x_0:cut_me + x_0]
+                X.append([selected_candidate, ratio, x_0, cut_me + x_0])
+            else:
+                selected_candidate = processed_data[x_0:cut_me + x_0]
+                X.append([selected_candidate, ratio, x_0, cut_me + x_0])
+
+            # lets plot
+            if plot:
+                plt.figure()
+                plot_signals(selected_candidate, label="SEGMENTED")
+        else:
+            pass
+
+    return X
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

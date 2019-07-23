@@ -141,7 +141,6 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         # Functionalities for the Detection
         self.menu_classification = QtGui.QMenu("&Classification", self)
         self.menu_classification.addAction('&FI', self.showFI)
-        self.menu_classification.addAction('&Machine Learning', self.showML)
         self.menuBar().addMenu(self.menu_classification)
 
         # Zoom and span buttons
@@ -185,10 +184,6 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         Function to load the segmented data and compute the results.
         """
         fi_windows = picoss_func.WindowFI(self).show()
-
-    def showML(self):
-        pass
-
 
     def show_isolated(self):
         """
@@ -239,7 +234,6 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         self.active_trace = datos.copy()
         self.stream = obspy.core.stream.Stream(traces=[self.active_trace])
         self.on_of = dict_loaded['on_of']
-        #self.fm = 100.0
         self.fm = float(dict_loaded['fm'])  # load the sampling_frequency.
         self.plot_trigger(self.on_of)
 
