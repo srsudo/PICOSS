@@ -240,13 +240,13 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         specifically, the make_stalta.sh script
         """
 
-        dict_loaded = picos_utils.load_picking_file(dictionary)
+        dict_loaded = picos_utils.load_processed_file(dictionary)
         datos = obspy.core.trace.Trace(data=dict_loaded['data'])
         self.active_trace = datos.copy()
         self.stream = obspy.core.stream.Stream(traces=[self.active_trace])
         self.on_of = dict_loaded['on_of']
-        self.fm = 100.0
-        # self.fm = float(dict_loaded['fm']) # load the sampling_frequency.
+        #self.fm = 100.0
+        self.fm = float(dict_loaded['fm'])  # load the sampling_frequency.
         self.plot_trigger(self.on_of)
 
     def plot_trigger(self, on_of):
@@ -389,7 +389,7 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
 
             self.toSave = "%s_%s_%s_%s_%s_%s_%s" % (self.network, self.station, self.channel, self.location,
                                                     self.start_data.year, self.day_of_the_year, self.duration)
-
+            self.segmentation_table = segmentation_table
             # Clean the figures to free memory and allow further plotting.
             self.clean_table()
             self.clean_figures()

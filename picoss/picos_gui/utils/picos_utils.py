@@ -26,8 +26,24 @@ import os
 import numpy as np
 from six.moves import cPickle
 import matplotlib.pyplot as plt
+import obspy
 from obspy.signal.trigger import classic_sta_lta, recursive_sta_lta, delayed_sta_lta, trigger_onset
 from scipy.signal import lfilter, hilbert
+from scipy import io
+import gc
+
+
+def write_tofile(file_path, text):
+    """
+    Function that writes information on a plain file.
+    Args:
+        file_path : Str
+            The file path where we would like to store the final file
+        text : Str
+            The text we want to write in.
+    """
+    with open(file_path, 'a+') as outfile:
+        outfile.write(str(text) + "\n")
 
 
 def save_pickle(destination_folder, filename, data):
@@ -67,8 +83,11 @@ def load_pickle(folder, filename):
         pass
 
 
-def load_picking_file(filename):
-    """Function to load the picking file previously processed by our interface"""
+def load_processed_file(filename):
+    """Function to load the picking file previously processed by our interface
+    Returns:
+        loaded_object: A list with the processed picking file we are using.
+    """
     try:
         f = open(filename, 'rb')
         loaded_object = cPickle.load(f)
@@ -76,6 +95,35 @@ def load_picking_file(filename):
         return loaded_object
     except (IOError, OSError) as e:
         pass
+
+
+def load_segmentation(filestring):
+    """
+    Function that checks the extension of a segmentation file and load the segmentation times.
+    Args:
+
+        filestring : str
+            This filestring is the string of the file we want to check the extension from.
+    Returns:
+    Numpy Array
+        A numpy array containing the segmentation times.
+    """
+    extension = filestring.split(".")[-1]
+    seg_times = None
+    try:
+        if extension == "npy":
+            seg_times = np.load(filestring)
+        elif extension == "p":
+            seg_times = load_processed_file(filestring)
+        else:
+            """Serialize an object into matlab format."""
+            seg_times = io.loadmat(filestring)
+    except:
+        seg_times = None
+
+    gc.collect()
+    # example of loaded data ['206.16', '214.0', 'U', '8652.82', '7.84', '1', '']
+    return seg_times
 
 
 def plot_signals(signal, label, save=None):
@@ -100,6 +148,72 @@ def plot_signals(signal, label, save=None):
 
     plt.show()
     plt.close()
+
+
+def process_trace(filename, bandpass=None):
+    """
+    This function reads a stream, detrend and filter and merge the data into a single numpy trace
+    Args:
+        filename : str
+            The filename of the
+        bandpass : list
+            A list containing the bandpass filter, if required.
+    Returns:
+    Trace :Numpy array
+        The numpy array containing the loaded seismic data.
+    sampling_frequency : Float
+        The sampling frequency of the loaded seismic data.
+    """
+
+    stream = obspy.read(filename).detrend()
+    if bandpass is not None:
+        filtered = stream.filter("bandpass", freqmin=bandpass[0], freqmax=bandpass[1])
+        trace = filtered.merge(method=0)
+    else:
+        trace = stream.merge(method=0)
+
+    sampling_frequency = trace[0].stats.sampling_rate
+
+    return trace[0], sampling_frequency
+
+
+def process_segmentation_table(filename_seg):
+    """
+    Function that reads the saved file of a segmentation table, and performs a single
+    Args:
+        filename_seg : str
+            The filename we would like to read the segmentation table from.
+    Returns:
+    List
+        The segmentation on/off of the file.
+    """
+    seg_times = load_segmentation(filename_seg)
+    return np.asarray([l[:2] for l in seg_times[2:]], dtype=float)
+
+
+def extract_signals(data, fs, segmentation_times):
+    """
+    Signal that given the set of segmentation times, extract the signal from the raw trace.
+    Args:
+        data : Numpy
+            The input seismic data containing both, start and end times of the seismic data.
+        fs : float
+            The sampling frequency.
+        segmentation_times : list
+            A list containing the segmentation of the file
+
+    Returns:
+    List
+        A list containing the extracted signals.
+    """
+    signals = []
+    durations = []
+    for m in segmentation_times:
+        segmented = data[int(m[0] * fs): int(m[1] * fs)]
+        signals.append(segmented)
+        durations.append(segmented.shape[0]/float(fs))
+
+    return signals, durations
 
 
 def merge_numpy(stream):
@@ -210,27 +324,95 @@ def compute_fft(signal, fm):
         The range of frequencies
     """
     n = len(signal)  # length of the signal
-    frq = np.arange(n) / (n / fm)  # two sides frequency range
+    frq = np.arange(n) / float((n / fm))  # two sides frequency range
     frq = frq[range(n / 2)]  # one side frequency range
-    y = np.fft.fft(signal) / n  # fft computing and normalization
+    y = np.fft.fft(signal) / float(n)  # fft computing and normalization
     y = y[range(n / 2)]
     return y, frq
 
 
 def compute_ratio(signal, midpoint, fm):
     """
-    Function to compute the HF/LF ratio of a given signal, using
+    Function to compute the HF/LF ratio of a given signal, using the FFT criteria
     :param signal: the signal we want to compute the HF/LF ratio.
     :param fm: the sampling frequency.
     :return: float . the HF/LF ratio.
     """
     fft, freqs = compute_fft(signal, fm)
-
     low_band = np.abs(fft[(freqs >= 1) & (freqs <= midpoint)])
     high_band = np.abs(fft[(freqs >= midpoint) & (freqs <= 20)])
-    ratio = np.log10(np.mean(np.sum(high_band)) / np.mean(np.sum(low_band)))
+    return np.log10(np.mean(np.sum(high_band)) / np.mean(np.sum(low_band)))
 
-    return ratio
+
+def evaluate_candidates(signal, slider_md, fm):
+    """
+    Function to evaluate the HF/LF ratios of given signals, using the compute_ratio function
+    :param signal: the signal we want to compute the HF/LF ratio.
+    :param fm: the sampling frequency.
+    :return: float . the HF/LF ratio.
+    """
+    ratios = []
+    for m in signal:
+        ratios.append(compute_ratio(m, slider_md, fm))
+    return ratios
+
+
+def evaluate_ratios(ratios, durations, thr_dur = 25.0, mu_low=-0.5, mu_high=0.5, mu_rock=0.2, mixed=None):
+    """
+    This functions evaluates the frequency ratios as described in:
+
+    Bueno, A., Diaz-Moreno, A., De Angelis, S., Benitez, C., Ibanez, J.M. (2019).
+    Recursive Entropy Method of Segmentation for Seismic Signals. 90 (4): 1670-1677.
+    doi: https://doi.org/10.1785/0220180317
+
+    The output are the labels of the events, and can be used for building up seismic datasets.
+    Args:
+        ratios : Numpy Array
+            The numpy array that contains the computed ratios from the segmented candidates
+        durations : Numpy Array
+            The numpy array that contains the computed durations from the segmented candidates
+        mu_low : float
+            The threshold used for the low frequency events
+        mu_high : float
+            The threshold used for the high frequency events
+        mu_rock : float
+            The threshold used for the rockfall vs tre frequency events
+
+        mixed : List
+            A list of events that can be used
+
+    Returns:
+    Numpy array:
+        A numpy array containing the assigned labels
+    """
+    lbl = []
+    # concatenate both
+
+    mu_hybridhigh = mu_high  # by default
+    mu_hybridlow = mu_low
+
+    if mixed is not None:
+        mu_hybridlow  = mixed[0]
+        mu_hybridhigh = mixed[1]
+
+    for m in zip(ratios, durations):
+        if m[1] < thr_dur:
+
+            if m[0] <= mu_low:
+                lbl.append('lf')
+
+            elif m[0] >= mu_low:
+                lbl.append('hf')
+
+            elif mu_hybridlow < m[0] < mu_hybridhigh:
+                lbl.append('mx')
+
+        elif m[1] > thr_dur and m[0] < mu_rock:
+            lbl.append('tre')
+        else:
+            lbl.append('rock')
+
+    return np.asarray(lbl)
 
 
 def check_masked_array(array):
@@ -354,9 +536,7 @@ def compute_sta_lta(data, fm, trigger_type, nlta=10.0, nsta=5.0, trig_on=1.2, tr
     """
 
     if np.isnan(data).any():
-        to_process = filtered.copy()
-        data = merge_numpy(to_process)
-
+        data = merge_numpy(data)
     try:
 
         if trigger_type == "Recursive":
@@ -459,6 +639,3 @@ def compute_ampa(data, fm, window, bandwidth, f_init, f_end, overlap, noise_thre
     del fc, delta
     return on
 
-
-def run_classification_fi(data, f):
-    pass

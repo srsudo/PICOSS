@@ -71,10 +71,6 @@ def check_emptiness(param):
         return False
 
 
-def load_picking_dictionary(filename):
-    pass
-
-
 def web_info(browser_path):
     """
     Function that given a browser path, opens a related information webpage about it.

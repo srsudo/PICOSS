@@ -737,7 +737,6 @@ class WindowAmpa(QtGui.QMainWindow, DialogAmpa.Ui_MainWindow):
         del trace, data
         self.close()
 
-
     def update_rows(self):
         numrows = self.tableWidget.rowCount()
         new_headers = ["Filter %s" % x for x in xrange(1, numrows)]
@@ -754,27 +753,122 @@ class WindowAmpa(QtGui.QMainWindow, DialogAmpa.Ui_MainWindow):
 
 class WindowFI(QtGui.QMainWindow, DialogFI.Ui_MainWindow):
     """
-    Function that handles the computation of STA/LTA files, and interfaces with the main GUI with the triggering and
-    plotting functionalities. Alternatively, other data files can be loaded within the interface.
+    Function that handles the computation of the Frequency Index Classification from the segmented files. Alternatively,
+     other data files can be loaded within the interface.
     """
     def __init__(self, parent):
         super(WindowFI, self).__init__(parent)
         self.setupUi(self)
         self.parentWindow = picoss_main.Ui_MainWindow
 
+        # high and low pass buttons.
+        self.buttonCancel.clicked.connect(self.cancel)
+        self.buttonLoad.clicked.connect(self.load_file_segmentation)
+        self.buttonLoadTrace.clicked.connect(self.load_file_trace)
 
-    def compute_plot(self):
-        # get the data from the parent and compute
-        pass
+        self.radioButtonMX.clicked.connect(self.enable_hybrids)
+        self.buttonComputeSave.clicked.connect(self.compute_classification)
+        self.loadedMaintrace.setText(self.parent().trace_loaded_filename)
 
-        self.parent().trigger(on_of)
-        self.close()
-        gc.collect()
+        self.trace = None
+        self.filename = None
+
+    def compute_classification(self):
+        """
+        Functions that computes the
+        Returns:
+        """
+        destination_folder = str(QtGui.QFileDialog.getExistingDirectory(None, "Select Folder"))
+
+        mu_l = -float(self.mu1.value())
+        mu_h = float(self.mu2.value())
+        mu_r = float(self.mu3.value())
+        hyb = self.get_hybrids()
+
+        t_user = 25.0
+
+        slider = float(self.sliderFrequency.value())
+        filename_seg = str(self.loadedsegmentation.text())
+        filename_trace = str(self.loadedMaintrace.text())
+
+        if slider < 2:
+            gui_functions.msg_box("Frequency Index requires broader frequency span", "Please, select Threshold values")
+        elif filename_trace == '' or filename_seg is '':
+            gui_functions.msg_box("The segmentation table and/or loaded files are required", "Please, load both files")
+        else:
+            # Obtain the main trace
+            self.trace, fm = self.process_data(filename_trace)
+            segmentation_times = utils.picos_utils.process_segmentation_table(filename_seg)
+            candidates_segmented, durations = np.asarray(utils.picos_utils.extract_signals(self.trace.data, fm, segmentation_times))
+            ratios = utils.picos_utils.evaluate_candidates(candidates_segmented, slider, fm)
+            labels = utils.picos_utils.evaluate_ratios(ratios, durations, thr_dur=t_user, mu_low=mu_l, mu_high=mu_h, mu_rock=mu_r, mixed=hyb)
+
+            #
+            data_toSave = {"segmentation_times": segmentation_times, "labels":labels}
+            toSave = "%s_FI.p" % filename_trace.split("/")[-1]
+
+            utils.picos_utils.save_pickle(destination_folder, toSave, data_toSave)
+            gc.collect()
+            self.close()
 
     def cancel(self):
         """close the window"""
         self.close()
         gc.collect()
 
-    def get_info(self):
-        pass
+    def process_data(self, filename_trace):
+        """function to process the data or copy from the main trace"""
+        try:
+            trace, fm = utils.picos_utils.process_trace(filename_trace, bandpass=[0.5, 20.0])
+
+        except:
+            trace, fm = self.parent().active_trace, self.parent().fm
+
+        return trace, fm
+
+    def load_file_segmentation(self):
+        """function to load the segmentation file"""
+
+        self.filename = str(QtGui.QFileDialog.getOpenFileName(self, 'Open File', 'segmented_data/'))
+        self.loadedsegmentation.setText(self.filename)
+
+    def load_file_trace(self):
+        self.loadedMaintrace.setText(str(QtGui.QFileDialog.getOpenFileName(self, 'Open File', 'data/')))
+
+    def empty_filed(self, val1, val2):
+        """
+        Function that checks if the hybrid low and hybrid high are checked or not, and if they are number.
+        Args:
+
+            val1 : str:
+                The first value to check
+            val2 : str
+                The second value to check
+        Returns:
+        True if any of the fields are empty, or not nobers
+        """
+
+        cond1 = gui_functions.check_emptiness(val1) and gui_functions.check_emptiness(val2)
+        cond2 = gui_functions.check_digits(val1) and gui_functions.check_digits(val2)
+
+        return cond1 and cond2
+
+    def get_hybrids(self):
+        """
+        Function get the information of the hybrids
+        """
+        mu_hybrid_l = str(self.hybridlow.text())
+        mu_hybrid_h = str(self.hybridhigh.text())
+        L = None
+        if self.radioButtonMX.isChecked() and self.empty_filed(mu_hybrid_l, mu_hybrid_h):
+            L = [float(mu_hybrid_l), (mu_hybrid_h)]
+        return L
+
+    def enable_hybrids(self):
+        """Function to enable the hybrids frequency classification"""
+        if self.radioButtonMX.isChecked():
+            self.hybridhigh.setEnabled(True)
+            self.hybridlow.setEnabled(True)
+        else:
+            self.hybridhigh.setEnabled(False)
+            self.hybridlow.setEnabled(False)
