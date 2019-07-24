@@ -609,7 +609,7 @@ class WindowPickingOnFly(QtGui.QMainWindow, DialogTrigger.Ui_MainWindow):
         cft, on_of = utils.picos_utils.compute_sta_lta(data, self.parent().fm,  kind, nlta=nlta,
                                                        nsta=nsta, trig_on=tgon, trig_off=toff)
 
-        self.parent().trigger(on_of)
+        self.parent().plot_trigger(on_of)
         self.close()
         gc.collect()
 

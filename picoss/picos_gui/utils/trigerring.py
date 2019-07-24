@@ -131,7 +131,7 @@ def plot_from_stalta(folder, filename):
     print "... Loaded %s " % filename
 
 
-def make_trigger(origin_folder, filename, dest_folder, trig_on, trig_of, nsta, nlta, plot=True):
+def make_trigger(origin_folder, filename, dest_folder, trig_on, trig_of, trigger_type, nsta, nlta):
     stream = obspy.read(os.path.join(origin_folder, filename))
 
     freqmin = bandpass[1]
@@ -145,7 +145,10 @@ def make_trigger(origin_folder, filename, dest_folder, trig_on, trig_of, nsta, n
     if np.isnan(merged).any():
         to_process = filtered.copy()
         data = merge_numpy(to_process)
-        cft = recursive_sta_lta(data, int(nsta * fm), int(nlta * fm))
+        print type(data)
+        print type(nsta)
+        print type(nlta)
+        cft = recursive_sta_lta(data, int(float(nsta) * fm), np.int(float(nlta) * fm))
         on_of = trigger_onset(cft, trig_on, trig_off)
 
     else:
@@ -157,9 +160,6 @@ def make_trigger(origin_folder, filename, dest_folder, trig_on, trig_of, nsta, n
     # we can process the whole day.
     cft = recursive_sta_lta(data, int(nsta * fm), int(nlta * fm))
     on_of = trigger_onset(cft, trig_on, trig_of)
-
-    if plot:
-        plot_results(filename, data, cft, on_of, trig_on, trig_of)
 
     save_stalta(dest_folder, filename, data, cft, on_of, trig_on, trig_of, fm)
 
@@ -182,7 +182,7 @@ def process_data(origin_folder, dest_folder, trig_on, trig_of, trigger_type, nst
 
     # we iterate over all the folder and process all the data
     for k in tqdm(os.listdir(origin_folder)):
-        make_trigger(origin_folder, k, dest_folder, trig_on, trig_of, trigger_type, nsta, nlta, plot=False)
+        make_trigger(origin_folder, k, dest_folder, trig_on, trig_of, trigger_type, nsta, nlta)
 
 
 if __name__ == "__main__":
