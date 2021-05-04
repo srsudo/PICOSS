@@ -12,10 +12,6 @@ Originally, PICOSS was designed for the purposes of seismicity research as a col
 
 # We are currently working on switching the interface from Python 2.7 to Python 3.0+
 
-# New features include buttons for Zooming, Spanning and Undo, along latest improvements and feedback received
-
-
-
 ![PICOSS logo](https://github.com/srsudo/PICOSS/tree/master/info/img/picos_header.png)
 
 
