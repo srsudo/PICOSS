@@ -150,6 +150,12 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         self.menu_toggle.addAction("Main View", self.toggle_view, QtCore.Qt.CTRL + QtCore.Qt.Key_U)
         self.menuBar().addMenu(self.menu_toggle)
 
+        # Results
+        self.menu_results = QtGui.QMenu("&Results", self)
+        self.menu_results.addAction("Visualize .npy", self.show_results)
+        self.menuBar().addMenu(self.menu_results)
+
+
         # We will deprecate this in a future.
         self.menu_about = QtGui.QMenu("&About", self)
         self.menu_about.addAction("How To Use this interface", self.pop_howtoMenu)
@@ -204,6 +210,10 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
     def load_picking_results(self):
         """Function to load picking results from a previously processed file"""
         stalta = picoss_func.WindowPicklingFile(self).show()
+
+    def show_results(self):
+        picoss_func.WindowVisualizeResults(self).show()
+
 
     def show_STALTA(self):
         sta_lta = picoss_func.WindowPickingOnFly(self).show()
@@ -272,6 +282,57 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
         self.ax.axvline(self.first_ticked, color='green', linestyle='solid')
         self.ax.axvline(self.last_ticked, color='magenta', linestyle='dashed')
         self.canvas_traza.draw()
+
+
+
+    def plot_results_seconds(self, on_of):
+        """
+        Function that load the already segmented events and plot it on the trace in SECONDS. Notice that in order to
+        make this function work, the events must be pre-segmented manually using PICOSS
+
+        A own dictionary from others segmentation file, BUT with the following fields are also possible:
+            'data' -> (the seismic data we want to process as a Numpy Array)
+            'on of' -> an activation vector with triggers on and off times IN SECONDS
+            'fm' -> the sampling frequency we are working with.
+
+        Args:
+            on_of : tuple
+                The tuple of activation times for the times arrays in seconds
+
+
+        """
+
+        time_Vector = np.linspace(0, self.active_trace.data.shape[0] / self.fm, num=self.active_trace.data.shape[0])
+        print(on_of)
+        # create an axis
+        self.ax = self.figura_traza.add_subplot(111)
+        # discards the old graph
+        self.ax.cla()
+        self.ax.plot(time_Vector, self.active_trace)
+        self.ax.toolbar_trace = NavigationToolbar(self.canvas_traza, self)
+
+        self.selector = RectangleSelector(self.ax, self.line_select_callback,
+                                          drawtype='box', useblit=True, button=[1],
+                                          minspanx=5, minspany=5, spancoords='pixels',
+                                          interactive=True)
+        ymin, ymax = self.ax.get_ylim()
+        self.ax.vlines(on_of[:, 0], ymin, ymax, color='g', linewidth=1)
+        self.ax.vlines(on_of[:, 1], ymin, ymax, color='magenta', linestyle='dashed', linewidth=1)
+
+        self.ax.axvline(self.first_ticked, color='green', linestyle='solid')
+        self.ax.axvline(self.last_ticked, color='magenta', linestyle='dashed')
+        self.canvas_traza.draw()
+
+
+
+
+
+
+
+
+
+
+
 
     def peak_to_peak(self):
         """

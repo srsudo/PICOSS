@@ -6,7 +6,7 @@ import obspy
 import math
 import multiprocessing
 from obspy import UTCDateTime
-
+import os
 # Graphical Packages
 from PyQt4 import QtGui, QtCore
 from matplotlib.widgets import RectangleSelector
@@ -24,6 +24,7 @@ from menus import DialogSave
 from menus import DialogTrigger
 from menus import DialogAmpa
 from menus import DialogFI
+from menus import DialogLoadResults
 
 import gui_functions
 import utils
@@ -640,6 +641,92 @@ class WindowPickingOnFly(QtGui.QMainWindow, DialogTrigger.Ui_MainWindow):
         kind = str(self.comboTrigger.currentText()).split(" ")[0]
 
         return kind, nlta, nsta, tgon, toff
+
+
+
+class WindowVisualizeResults(QtGui.QMainWindow, DialogLoadResults.Ui_MainWindow):
+    """
+    Function that VISUALIZE THE SEGMENTED EVENTS
+    """
+    def __init__(self, parent):
+        super(WindowVisualizeResults, self).__init__(parent)
+        self.setupUi(self)
+        self.parentWindow = picoss_main.Ui_MainWindow
+
+        # Here, we should add the listener
+        self.pushButton_4.clicked.connect(self.plot_results)
+        self.pushButton_5.clicked.connect(self.load_main)
+        self.pushButton_3.clicked.connect(self.load_results)
+
+        self.filename_trace = None
+        self.filename_results = None
+
+    def preprocess_results(self, table):
+        table = np.asarray([l[:2] for l in table[2:]], dtype=float)
+        return table
+
+    def load_main(self):
+        self.filename_trace = str(QtGui.QFileDialog.getOpenFileName(self, 'Open File', 'data/'))
+        self.label_filename_1.setText(self.filename_trace)
+
+    def load_results(self):
+        self.filename_results = str(QtGui.QFileDialog.getOpenFileName(self, 'Open File', 'segmentation_data/'))
+        self.label_filename_2.setText(self.filename_results)
+
+    def plot_results(self):
+        # get the data from the parent and compute
+        new_job = multiprocessing.Process(target=self.parent().clean_figures(), args=())
+        new_job_main = multiprocessing.Process(target=self.parent().clean_canvas(), args=())
+        new_job.start()
+        new_job_main.start()
+        # Get the info and compute
+        trace = str(self.label_filename_1.text())
+        print("MAIN RESULTS")
+        results = str(self.label_filename_2.text())
+        print("***************")
+        self.parent().trace_loaded_filename = trace
+        self.parent().plot_from_file()
+
+
+        array_results = np.load(results)
+        print(array_results[2:])
+        on_of = self.preprocess_results(array_results)
+        self.parent().plot_results_seconds(on_of)
+        #self.close()
+        #gc.collect()
+
+    def cancel(self):
+        """close the window"""
+        self.close()
+        gc.collect()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class WindowAmpa(QtGui.QMainWindow, DialogAmpa.Ui_MainWindow):
