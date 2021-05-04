@@ -296,8 +296,7 @@ class Picos(QtGui.QMainWindow, picoss_main.Ui_MainWindow):
             'fm' -> the sampling frequency we are working with.
 
         Args:
-            on_of : tuple
-                The tuple of activation times for the times arrays in seconds
+            on_of : tuple The tuple of activation times for the times arrays in seconds
 
 
         """
